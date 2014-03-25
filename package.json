@@ -17,7 +17,8 @@
   "author": "Wang Wenlin",
   "license": "BSD",
   "dependencies": {
-    "http-signature": "~0.10.0"
+    "http-signature": "~0.10.0",
+    "websocket": "~1.0.8"
   },
   "readmeFilename": "README.md",
   "devDependencies": {}
