@@ -1,6 +1,6 @@
 {
   "name": "stompjs-http-signature",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Stomp.js with http-signature support",
   "main": "index.js",
   "scripts": {
