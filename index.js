@@ -57,11 +57,11 @@ function wrapWS(url, headers) {
   socket.on('connect', function(conn) {
     connection = conn;
     ws.onopen();
-    connection.on('error', function(error) {
-      return typeof ws.onclose === "function" ? ws.onclose(error) : void 0;
+    connection.on('error', function(e) {
+      return typeof ws.onclose === "function" ? ws.onclose(e) : void 0;
     });
     connection.on('close', function() {
-      return typeof ws.onclose === "function" ? ws.onclose(error) : void 0;
+      return typeof ws.onclose === "function" ? ws.onclose() : void 0;
     });
     return connection.on('message', function(message) {
       var event;
