@@ -37,7 +37,7 @@ function sign(url, options) {
     headers: options.headers,
 
     setHeader: function (k, v) {
-      return this.headers[k.toLowerCase()] = v;
+      return (this.headers[k.toLowerCase()] = v);
     },
     getHeader: function (k) {
       return this.headers[k.toLowerCase()];
@@ -60,18 +60,18 @@ function wrapWS(url, options) {
   };
 
   socket.on('connect', function(conn) {
-    if (typeof options.onopen === "function") options.onopen(conn);
+    if (typeof options.onopen === 'function') options.onopen(conn);
 
     connection = conn;
     ws.onopen();
 
     connection.on('error', function(e) {
-      if (typeof options.onerror === "function") options.onerror(e);
-      return typeof ws.onclose === "function" ? ws.onclose(e) : void 0;
+      if (typeof options.onerror === 'function') options.onerror(e);
+      return typeof ws.onclose === 'function' ? ws.onclose(e) : void 0;
     });
     connection.on('close', function() {
-      if (typeof options.onclose === "function") options.onclose();
-      return typeof ws.onclose === "function" ? ws.onclose() : void 0;
+      if (typeof options.onclose === 'function') options.onclose();
+      return typeof ws.onclose === 'function' ? ws.onclose() : void 0;
     });
 
     return connection.on('message', function(message) {
@@ -86,9 +86,9 @@ function wrapWS(url, options) {
   });
 
   socket.on('connectFailed', function(e) {
-    if (typeof options.onerror === "function") options.onerror(e);
+    if (typeof options.onerror === 'function') options.onerror(e);
   });
 
   socket.connect(url, [], '', options.headers);
   return ws;
-};
+}

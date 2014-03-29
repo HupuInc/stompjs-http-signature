@@ -1,4 +1,3 @@
-var assert = require("assert");
 var Stomp = require('stompjs');
 var ws = require('ws');
 var httpSignature = require('http-signature');
@@ -24,8 +23,10 @@ function startServer(simul) {
 
     verifyClient: function (info) {
       switch (simul) {
-        case 'reject': return false;
-        case 'accept': return true;
+        case 'reject':
+          return false;
+        case 'accept':
+          return true;
       }
       try {
         var parsed = httpSignature.parse(info.req);
@@ -37,7 +38,10 @@ function startServer(simul) {
   });
 
   server.on('connection', function (c) {
-    c.on('message', function (m) { c.send(m); });
+    c.on('message', function (m) {
+      if (m.split('\n')[0] !== 'CONNECT') return;
+      c.send('CONNECTED\nversion:1.1\nheart-beat:10000,10000\nsession:1092296064\n\n\0');
+    });
   });
 }
 
@@ -50,6 +54,8 @@ function stopServer() {
 
 /* Test Cases
  */
+/* global afterEach, describe, it */
+
 afterEach(function(done){
   stopServer();
   done();
@@ -60,22 +66,22 @@ describe('WebSocket', function(){
     it('should ECONNRESET when remote notexist', function(done){
       Stomp.overWS('ws://127.0.0.1:3000', {
         onerror: function (e) { if (e) done(); },
-      })
-    })
+      });
+    });
 
     it('should error when remote reject, no sign', function(done){
       startServer('reject');
       Stomp.overWS('ws://127.0.0.1:3000', {
         onerror: function (e) { if (e) done(); },
-      })
-    })
+      });
+    });
 
     it('should error when remote reject, miss sign', function(done){
       startServer();
       Stomp.overWS('ws://127.0.0.1:3000', {
         onerror: function (e) { if (e) done(); },
-      })
-    })
+      });
+    });
 
     it('should error when remote reject, with invalid sign', function(done){
       startServer();
@@ -86,9 +92,9 @@ describe('WebSocket', function(){
           keyId: 'id',
           key: 'keyerr',
         },
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe('#onclose', function(){
     it('should call on remote close', function(done){
@@ -97,25 +103,38 @@ describe('WebSocket', function(){
         onopen: function() { stopServer(); },
         onclose: function() { done(); },
       }).connect({}, function() {});
-    })
-  })
+    });
+  });
 });
 
 describe('StompClient', function(){
   describe('#onopen', function(){
     it('should ok when normal connect, no sign', function(done){
       startServer('accept');
-      Stomp.overWS('ws://127.0.0.1:3000', {
-        onopen: function() { done(); },
-      }).connect({}, function() {});
-    })
+      Stomp.overWS('ws://127.0.0.1:3000').connect({}, function() {
+        done();
+      });
+    });
 
     it('should ok when normal connect, with sign', function(done){
       startServer();
-      Stomp.overWS('ws://127.0.0.1:3000', {
-        onopen: function() { done(); },
-        sign: sign,
-      }).connect({}, function() {});
-    })
-  })
+      Stomp.overWS('ws://127.0.0.1:3000', {sign: sign}).connect({}, function() {
+        done();
+      });
+    });
+  });
+
+  describe('#onclose', function(){
+    it('should be invoked on remote close', function(done){
+      startServer('accept');
+      Stomp.overWS('ws://127.0.0.1:3000').connect({}, function() {
+        stopServer();
+      }, function() {
+        if (done) {
+          done();
+          done = null;
+        }
+      });
+    });
+  });
 });

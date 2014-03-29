@@ -1,7 +1,7 @@
 var Stomp = require('stompjs');
 
 // override
-Stomp.overWS = require('stompjs-http-signature').overWS;
+Stomp.overWS = require('../').overWS;
 
 (function process() {
   var client = Stomp.overWS('ws://127.0.0.1:3000', {
