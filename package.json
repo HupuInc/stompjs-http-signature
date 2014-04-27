@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/HupuInc/stompjs-http-signature"
+    "url": "https://github.com/HupuInc/stompjs-http-signature.git"
   },
   "keywords": [
     "Stomp.js",
