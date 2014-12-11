@@ -14,9 +14,16 @@ Stomp.overWS = require('../').overWS;
     },
   });
 
+  var timer = setTimeout(function () {
+    client.disconnect();
+    onend();
+  }, 5*1000);
+
   client.debug = console.log.bind(console);
 
   client.connect({}, function onopen() {
+    clearTimeout(timer);
+
     client.subscribe('/topic/foo', function (msg) {
       console.log(msg.body);
       msg.ack();
