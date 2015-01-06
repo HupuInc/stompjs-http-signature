@@ -3,7 +3,7 @@
  BSD License.
  */
 
-var WebSocketClient = require('websocket').client;
+var WebSocketClient = require('websocket').w3cwebsocket;
 var httpSignature = require('http-signature');
 
 /* HOWTO:
@@ -46,49 +46,37 @@ function sign(url, options) {
 }
 
 function wrapWS(url, options) {
-  var socket = new WebSocketClient();
-  var connection = null;
+  var socket = new WebSocketClient(url, [], '', options.headers);
 
   var ws = {
     url: url,
     send: function(d) {
-      return connection.sendUTF(d);
+      return socket.send(d);
     },
     close: function() {
-      return connection.close();
+      return socket.close();
     },
   };
 
-  socket.on('connect', function(conn) {
-    if (typeof options.onopen === 'function') options.onopen(conn);
+  socket.onerror = function(evt) {
+    if (typeof ws.onerror === 'function') {
+      ws.onerror(evt);
+    }
+  };
 
-    connection = conn;
+  socket.onclose = function(evt) {
+    if (typeof ws.onclose === 'function') {
+      ws.onclose(evt);
+    }
+  };
+
+  socket.onmessage = function(evt) {
+    ws.onmessage(evt);
+  };
+
+  socket.onopen = function() {
     ws.onopen();
+  };
 
-    connection.on('error', function(e) {
-      if (typeof options.onerror === 'function') options.onerror(e);
-      return typeof ws.onclose === 'function' ? ws.onclose(e) : void 0;
-    });
-    connection.on('close', function() {
-      if (typeof options.onclose === 'function') options.onclose();
-      return typeof ws.onclose === 'function' ? ws.onclose() : void 0;
-    });
-
-    return connection.on('message', function(message) {
-      var event;
-      if (message.type === 'utf8') {
-        event = {
-          'data': message.utf8Data
-        };
-        return ws.onmessage(event);
-      }
-    });
-  });
-
-  socket.on('connectFailed', function(e) {
-    if (typeof options.onerror === 'function') options.onerror(e);
-  });
-
-  socket.connect(url, [], '', options.headers);
   return ws;
 }
